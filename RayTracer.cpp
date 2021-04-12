@@ -85,7 +85,7 @@ void RayTracer::BuildScene() {
 }
 
 void RayTracer::StartRayTracing() {
-    ofstream fout("./output/temp4.ppm");
+    ofstream fout("./output/temp1.ppm");
     fout << "P3\n" << nx << " " << ny << "\n255\n";
     for (int j = ny - 1; j >= 0; j--) {
         cout << j << endl;

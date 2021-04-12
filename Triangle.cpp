@@ -48,7 +48,6 @@ bool Triangle::bounding_box(AxisAlignedBoundingBox &box) const {
     Vec3 maxv(max(max(A.x(), B.x()), C.x()), max(max(A.y(), B.y()), C.y()), max(max(A.z(), B.z()), C.z()));
 
     Vec3 dif = maxv - minv;
-    // TODO: 这里的用意何在？
     if (dif.x() < 1E-5) maxv[0] += 1E-5;
     if (dif.y() < 1E-5) maxv[1] += 1E-5;
     if (dif.z() < 1E-5) maxv[2] += 1E-5;

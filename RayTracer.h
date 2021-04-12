@@ -23,6 +23,7 @@ class RayTracer {
     int nx, ny, ns;
     Camera camera;
     BVHNode *world;
+    vector<vector<double>> results;
 public:
     RayTracer();
     Vec3 color(const Ray &r, Hitable *world, int depth);
