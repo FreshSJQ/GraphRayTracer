@@ -6,8 +6,6 @@
 #include "Ray.h"
 #include "Utils.h"
 
-#define PI 3.14159265358979323846
-
 class Camera {
     Vec3 origin;
     Vec3 lower_left_corner;

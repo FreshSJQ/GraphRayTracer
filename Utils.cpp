@@ -32,3 +32,10 @@ double schlick(double cosine, double ref_idx) {
     r0 = r0 * r0;
     return r0 + (1 - r0) * pow((1 - cosine), 5);
 }
+
+void get_sphere_uv(const Vec3& p, double& u, double& v) {
+    double phi = atan2(p.z(), p.x());
+    double theta = asin(p.y());
+    u = 1 - (phi + PI) / (2 * PI);
+    v = (theta + PI / 2) / PI;
+}

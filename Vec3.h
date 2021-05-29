@@ -61,6 +61,10 @@ public:
         return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
     }
 
+    inline bool isEmitted() {
+        return e[0] > 1.0 || e[1] > 1.0 || e[2] > 1.0;
+    }
+
     inline void make_unit_vector();
 
     inline Vec3 Normalize() const;
@@ -113,7 +117,7 @@ inline Vec3 operator*(const Vec3 &v, double t) {
     return Vec3(v.e[0] * t, v.e[1] * t, v.e[2] * t);
 }
 
-inline double dot(const Vec3 &v1, const Vec3 &v2) {
+inline double dot(const Vec3& v1, const Vec3 &v2) {
     return v1.e[0] * v2.e[0] + v1.e[1] * v2.e[1] + v1.e[2] * v2.e[2];
 }
 

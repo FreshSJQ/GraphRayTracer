@@ -30,7 +30,7 @@ BVHNode::BVHNode(vector<Hitable*>::iterator start, vector<Hitable*>::iterator en
         right = *(start + 1);
     } else {
         left = new BVHNode(start, start + n / 2, n / 2);
-        right = new BVHNode(start + n / 2, end, n / 2);
+        right = new BVHNode(start + n / 2, end, n - n / 2);
     }
     AxisAlignedBoundingBox box_left, box_right;
     if(!left->bounding_box(box_left) || !right->bounding_box(box_right))

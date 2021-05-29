@@ -10,9 +10,11 @@
 #include "Hitable.h"
 
 class Triangle : public Hitable {
-protected:
     double area;
     Material *mat_ptr;
+    Vec3 normal;
+    Vec3 edge1;
+    Vec3 edge2;
 public:
     Vec3 A, B, C;
 
@@ -22,8 +24,6 @@ public:
 
     bool bounding_box(AxisAlignedBoundingBox &box) const override;
 
-    void Init();
-
     Vec3 getNormal(const HitRecord &rec) const {
         return normal;
     }
@@ -31,11 +31,6 @@ public:
     void Scale(double scale);
 
     void Translate(const Vec3 &t);
-
-protected:
-    Vec3 normal;
-    Vec3 edge1;
-    Vec3 edge2;
 };
 
 #endif //GRAPH_TRIANGLE_H

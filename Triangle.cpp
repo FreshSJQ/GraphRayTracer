@@ -2,10 +2,6 @@
 #include "Triangle.h"
 
 Triangle::Triangle(const Vec3 &a, const Vec3 &b, const Vec3 &c, Material *m): A(a), B(b), C(c), mat_ptr(m) {
-    Init();
-}
-
-void Triangle::Init() {
     edge1 = B - A;
     edge2 = C - A;
     normal = cross(edge1, edge2);
@@ -14,26 +10,22 @@ void Triangle::Init() {
 }
 
 bool Triangle::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
-    const Vec3 pvec = cross(r.getDirection(), edge2);
-    const double det = dot(pvec, edge1);
+    Vec3 vector2 = cross(r.getDirection(), edge2);
+    double delta = dot(vector2, edge1);
+    if(abs(delta) < 1E-5) return false;
 
-    if (abs(det) < 1E-15) return false;
+    Vec3 vector1 = cross(r.getDirection(), edge1);
 
-    const double invdet = 1. / det;
+    Vec3 OA = r.getOrigin() - A;
 
-    const Vec3 tvec = r.getOrigin() - A;
+    double u = dot(vector2, OA) / delta;
+    if(u < 0 || u > 1) return false;
 
-    const double u = dot(pvec, tvec) * invdet;
-    if (u < 0 || u > 1) return false;
+    double v = dot(vector1, OA) / dot(vector1, edge2);
+    if(v < 0 || u + v > 1) return false;
 
-    const Vec3 qvec = cross(tvec, edge1);
-    const double v = dot(qvec, r.getDirection()) * invdet;
-
-    if (v < 0 || u + v > 1.) return false;
-
-    const double t = dot(qvec, edge2) * invdet;
-
-    if (t < t_min || t > t_max) return false;
+    double t = dot(cross(OA, edge1), edge2) / delta;
+    if(t < t_min || t > t_max) return false;
 
     rec.t = t;
     rec.p = r.getOrigin() + t * r.getDirection();
