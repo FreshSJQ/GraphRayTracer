@@ -11,6 +11,8 @@ double randNum01();
 
 Vec3 random_in_unit_sphere();
 
+Vec3 random_in_unit_disk();
+
 Vec3 reflect(const Vec3& v, const Vec3& n);
 
 bool refract(const Vec3& v, const Vec3& n, double ni_over_nt, Vec3& refracted);

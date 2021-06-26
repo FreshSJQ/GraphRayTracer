@@ -24,7 +24,6 @@ class RayTracer {
 public:
     RayTracer();
     Vec3 color(const Ray &r, Hitable *world, int depth);
-    void RandomScene();
     void BuildScene();
     void StartRayTracing();
 };
