@@ -13,6 +13,10 @@
 #include "ObjLoader.h"
 #include "BVHNode.h"
 #include "Rectangle.h"
+#include "FlipNormals.h"
+#include "Translate.h"
+#include "RotateY.h"
+#include "Box.h"
 
 using namespace std;
 
