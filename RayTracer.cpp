@@ -6,9 +6,9 @@
 
 RayTracer::RayTracer() {
     srand(time(nullptr));
-    nx = 800;
-    ny = 800;
-    ns = 200;
+    nx = 200;
+    ny = 200;
+    ns = 100;
 //    Vec3 lookfrom(13, 2, 3);
 //    Vec3 lookat(0, 0, 0);
 //    double dist_to_focus = 10.0;
@@ -29,8 +29,9 @@ Vec3 RayTracer::color(const Ray &r, Hitable *scene, int depth) {
         Ray scattered;
         Vec3 attenuation;
         Vec3 emitted = rec.mat_ptr->Emitted(rec.u, rec.v, rec.p);
-        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-            return emitted + attenuation * color(scattered, scene, depth + 1);
+        double pdf;
+        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf)) {
+            return emitted + attenuation * rec.mat_ptr->scateringPDF(r, rec, scattered) * color(scattered, scene, depth + 1) /  pdf;
         } else {
             return emitted;
         }
