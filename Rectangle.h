@@ -39,6 +39,22 @@ public:
         return true;
     }
 
+    double pdfValue(const Vec3& o, const Vec3& v) const override {
+        HitRecord hrec;
+        if(this->hit(Ray(o, v), 0.001, DBL_MAX, hrec)) {
+            double area = (x1 - x0) * (z1 - z0);
+            double distance_squared = hrec.t * hrec.t * v.squared_length();
+            double cosine = fabs(dot(v, hrec.normal) / v.length());
+            return distance_squared / (cosine * area);
+        }
+        else return 0;
+    }
+
+    Vec3 random(const Vec3& o) const override {
+        Vec3 randomPoint = Vec3(x0 + randNum01() * (x1 - x0), k, z0 + randNum01() * (z1 - z0));
+        return randomPoint - o;
+    }
+
 };
 
 class RECTYZ : public Hitable {

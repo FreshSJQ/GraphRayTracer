@@ -23,4 +23,6 @@ double schlick(double cosine, double ref_idx);
 
 void get_sphere_uv(const Vec3& p, double& u, double& v);
 
+Vec3 random_cosin_direction();
+
 #endif //RAYTRACER_UTILS_H

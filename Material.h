@@ -7,6 +7,7 @@
 #include "Vec3.h"
 #include "Ray.h"
 #include "Texture.h"
+#include "ONB.h"
 
 class Material;
 
@@ -27,7 +28,7 @@ public:
         return false;
     }
 
-    virtual Vec3 Emitted(double u, double v, const Vec3 &p) const {
+    virtual Vec3 Emitted(const Ray& r_in, const HitRecord& rec, double u, double v, const Vec3 &p) const {
         return Vec3(0, 0, 0);
     }
 };
@@ -75,8 +76,10 @@ public:
         return false;
     }
 
-    Vec3 Emitted(double u, double v, const Vec3 &p) const override {
-        return emit->Value(u, v, p);
+    Vec3 Emitted(const Ray& r_in, const HitRecord& rec, double u, double v, const Vec3 &p) const override {
+        if(dot(rec.normal, r_in.getDirection()) > 0.0)
+            return emit->Value(u, v, p);
+        else return Vec3(0, 0, 0);
     }
 };
 

@@ -54,3 +54,13 @@ void get_sphere_uv(const Vec3 &p, double &u, double &v) {
     u = 1 - (phi + PI) / (2 * PI);
     v = (theta + PI / 2) / PI;
 }
+
+Vec3 random_cosin_direction() {
+    double r1 = randNum01();
+    double r2 = randNum01();
+    double z = sqrt(1 - r2);
+    double phi = 2 * PI * r1;
+    double x = cos(phi) * 2 * sqrt(r2);
+    double y = sin(phi) * 2 * sqrt(r2);
+    return Vec3(x, y, z);
+}

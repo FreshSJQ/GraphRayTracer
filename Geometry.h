@@ -20,6 +20,50 @@ public:
     }
 };
 
+class Disk: public Hitable {
+    Vec3 center;
+    double radius;
+    Material* mat_ptr;
+    double height;
+    double x0, x1, z0, z1, k;
+public:
+    Disk() {}
+    Disk(Vec3 cen, double r, Material* m) : center(cen), radius(r), height(cen.y()), mat_ptr(m){
+        x0 = center.x() - radius;
+        x1 = center.x() + radius;
+        z0 = center.x() - radius;
+        z1 = center.x() + radius;
+        k = height;
+    }
+    bool hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const override;
+    bool bounding_box(AxisAlignedBoundingBox& box) const override {
+        box = AxisAlignedBoundingBox(Vec3(center.x() - radius, height - 0.001, center.z() - radius),
+                                     Vec3(center.x() + radius, height + 0.001, center.z() + radius));
+        return true;
+    }
+    double pdfValue(const Vec3& o, const Vec3& v) const override {
+        HitRecord hrec;
+        if(this->hit(Ray(o, v), 0.001, DBL_MAX, hrec)) {
+            double area = radius * radius * PI;
+//            double area = (x1 - x0) * (z1 - z0);
+            double distance_squared = hrec.t * hrec.t * v.squared_length();
+            double cosine = fabs(dot(v, hrec.normal) / v.length());
+            return distance_squared / (cosine * area);
+        }
+        else return 0;
+    }
+
+    Vec3 random(const Vec3& o) const override {
+        Vec3 p = random_in_unit_disk();
+        p[2] = p[1];
+        p[1] = 0;
+        Vec3 randomPoint = radius * p + center;
+        return randomPoint - o;
+//        Vec3 randomPoint = Vec3(x0 + randNum01() * (x1 - x0), k, z0 + randNum01() * (z1 - z0));
+//        return randomPoint - o;
+    }
+};
+
 class Cylinder : public Hitable {
     Vec3 center;
     double radius;

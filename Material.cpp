@@ -10,6 +10,13 @@ bool Lambertian::scatter(const Ray &r_in, const HitRecord &rec, Vec3 &attenuatio
     attenuation = albedo->Value(rec.u, rec.v, rec.p);
     pdf = dot(rec.normal, scattered.getDirection()) / PI;
     return true;
+//    ONB uvw;
+//    uvw.BuildFromW(rec.normal);
+//    Vec3 direction = uvw.local(random_cosin_direction());
+//    scattered = Ray(rec.p, unit_vector(direction), r_in.time());
+//    attenuation = albedo->Value(rec.u, rec.v, rec.p);
+//    pdf = dot(uvw.w(), scattered.getDirection()) / PI;
+//    return true;
 }
 
 bool Metal::scatter(const Ray &r_in, const HitRecord &rec, Vec3 &attenuation, Ray &scattered, double& pdf) const {
