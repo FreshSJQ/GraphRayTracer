@@ -53,4 +53,11 @@ public:
     }
 };
 
+class MicrofacetPDF : public PDF {
+    ONB onb;
+public:
+    MicrofacetPDF(Vec3& inc, Vec3& norm):onb(norm, inc){}
+
+};
+
 #endif //RAYTRACER_PDF_H

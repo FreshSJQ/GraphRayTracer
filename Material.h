@@ -11,6 +11,8 @@
 
 class Material;
 
+class PDF;
+
 struct HitRecord {
     double t;
     Vec3 p;
@@ -20,9 +22,16 @@ struct HitRecord {
     double v;
 };
 
+struct ScatterRecord {
+    Ray specularRay;
+    bool isSpecular;
+    Vec3 attenuation;
+    PDF *pdf_ptr;
+};
+
 class Material {
 public:
-    virtual bool scatter(const Ray &r_in, const HitRecord &rec, Vec3 &attenuation, Ray &scattered, double& pdf) const = 0;
+    virtual bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const = 0;
 
     virtual double scateringPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const {
         return false;
@@ -45,7 +54,7 @@ public:
         return cosine / PI;
     }
 
-    bool scatter(const Ray &r_in, const HitRecord &rec, Vec3 &attenuation, Ray &scattered, double& pdf) const override;
+    bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const override;
 };
 
 class Metal : public Material {
@@ -54,16 +63,25 @@ class Metal : public Material {
 public:
     Metal(Texture *a, double f) : albedo(a) { if (f < 1) fuzz = f; else fuzz = 1; }
 
-    bool scatter(const Ray &r_in, const HitRecord &rec, Vec3 &attenuation, Ray &scattered, double& pdf) const override;
+    bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const override;
 };
 
+class Microfacet : public Material {
+    Texture *albedo;
+    double roughness;
+
+public:
+    Microfacet(Texture *a, double r):albedo(a), roughness(r){}
+
+    bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const override;
+};
 
 class Dielectric : public Material {
     double ref_idx;
 public:
     Dielectric(double ri) : ref_idx(ri) {}
 
-    bool scatter(const Ray &r_in, const HitRecord &rec, Vec3 &attenuation, Ray &scattered, double& pdf) const override;
+    bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const override;
 };
 
 class DiffuseLight : public Material {
@@ -72,7 +90,7 @@ public:
 
     DiffuseLight(Texture *a) : emit(a) {}
 
-    bool scatter(const Ray &r_in, const HitRecord &rec, Vec3 &attenuation, Ray &scattered, double& pdf) const override {
+    bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const override {
         return false;
     }
 
@@ -82,5 +100,7 @@ public:
         else return Vec3(0, 0, 0);
     }
 };
+
+
 
 #endif //RAYTRACER_MATERIAL_H

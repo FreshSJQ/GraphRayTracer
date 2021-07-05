@@ -6,48 +6,37 @@
 
 RayTracer::RayTracer() {
     srand(time(nullptr));
-    nx = 400;
-    ny = 400;
-    ns = 200;
-//    Vec3 lookfrom(13, 2, 3);
-//    Vec3 lookat(0, 0, 0);
-//    double dist_to_focus = 10.0;
-//    double aperture = 0.0;
-//    double vfov = 20.0
-    Vec3 lookfrom(278, 278, -800);
-    Vec3 lookat(278, 278, 0);
+    nx = 512;
+    ny = 512;
+    ns = 512;
+    Vec3 lookfrom(13, 2, 3);
+    Vec3 lookat(0, 0, 0);
     double dist_to_focus = 10.0;
     double aperture = 0.0;
-    double vfov = 40.0;
+    double vfov = 20.0;
+//    Vec3 lookfrom(278, 278, -800);
+//    Vec3 lookat(278, 278, 0);
+//    double dist_to_focus = 10.0;
+//    double aperture = 0.0;
+//    double vfov = 40.0;
 
     camera = Camera(lookfrom, lookat, Vec3(0, 1, 0), vfov, double(nx) / double(ny), aperture, dist_to_focus, 0.0, 1.0);
 }
 
 Vec3 RayTracer::color(const Ray &r, Hitable *scene, int depth) {
-    HitRecord rec;
-    if (scene->hit(r, 0.001, FLT_MAX, rec)) {
-        Ray scattered;
-        Vec3 attenuation;
-        Vec3 emitted = rec.mat_ptr->Emitted(r, rec, rec.u, rec.v, rec.p);
-        double pdf_val;
-        Vec3 albedo;
-        if (depth < 50 && rec.mat_ptr->scatter(r, rec, albedo, scattered, pdf_val)) {
-//            Hitable *light_shape = new RECTXZ(213, 343, 227, 332, 554, 0);
-            Hitable* light_shape = new Disk(Vec3(278, 554, 278), 100, 0);
-            HitablePDF p0(light_shape, rec.p);
-            CosinePDF p1(rec.normal);
-            MixturePDF p(&p0, &p1);
-            scattered = Ray(rec.p, p.generate(), r.time());
-            pdf_val = p.value(scattered.getDirection());
-            if(pdf_val == 0) {
-                pdf_val = 1;
-            }
-            delete light_shape;
-//            Hitable *light_shape = new RECTXZ(213, 343, 227, 332, 554, 0);
-//            HitablePDF p(light_shape, rec.p);
-//            scattered = Ray(rec.p, p.generate(), r.time());
-//            pdf_val = p.value(scattered.getDirection());
-            return emitted + albedo * rec.mat_ptr->scateringPDF(r, rec, scattered) * color(scattered, scene, depth + 1) /  pdf_val;
+    HitRecord hrec;
+    if (scene->hit(r, 0.001, FLT_MAX, hrec)) {
+        ScatterRecord srec;
+        Vec3 emitted = hrec.mat_ptr->Emitted(r, hrec, hrec.u, hrec.v, hrec.p);
+        if (depth < 50 && hrec.mat_ptr->scatter(r, hrec, srec)) {
+            HitablePDF pLight(light_shape, hrec.p);
+            MixturePDF p(&pLight, srec.pdf_ptr);
+            Ray scattered = Ray(hrec.p, p.generate(), r.time());
+            double pdf_val = p.value(scattered.getDirection());
+            if(pdf_val == 0) pdf_val = 1;
+            delete srec.pdf_ptr;
+            return emitted + srec.attenuation * hrec.mat_ptr->scateringPDF(r, hrec, scattered) *
+                color(scattered, scene, depth + 1) /  pdf_val;
         } else {
             return emitted;
         }
@@ -59,25 +48,15 @@ Vec3 RayTracer::color(const Ray &r, Hitable *scene, int depth) {
 
 void RayTracer::BuildScene() {
     vector<Hitable *> list;
-    Material *red = new Lambertian(new ConstantTexture(Vec3(0.65, 0.05, 0.05)));
     Material *white = new Lambertian(new ConstantTexture(Vec3(0.73, 0.73, 0.73)));
-    Material *green = new Lambertian(new ConstantTexture(Vec3(0.12, 0.45, 0.15)));
     Material *light = new DiffuseLight(new ConstantTexture(Vec3(15, 15, 15)));
+    Material *red = new Lambertian(new ConstantTexture(Vec3(0.65, 0.05, 0.05)));
 
-    list.push_back(new FlipNormals(new RECTYZ(0, 555, 0, 555, 555, green)));
-    list.push_back(new RECTYZ(0, 555, 0, 555, 0, red));
-//    list.push_back(new RECTXZ(213, 343, 227, 332, 554, light));
-//    list.push_back(new RECTXZ(213, 343, 227, 332, 100, red));
-    list.push_back(new Disk(Vec3(278, 554, 278), 100, light));
-//    list.push_back(new RECTXZ(213, 343, 227, 332, 100, light));
-    list.push_back(new FlipNormals(new RECTXZ(0, 555, 0, 555, 555, white)));
-    list.push_back(new RECTXZ(0, 555, 0, 555, 0, white));
-    list.push_back(new FlipNormals(new RECTXY(0, 555, 0, 555, 555, white)));
+    list.push_back(new RECTXZ(7, 8, 1, 2, 4, light));
+    light_shape = new RECTXZ(7, 8, 1, 2, 4, nullptr);
+    list.push_back(new Sphere(Vec3(0, -1000, 0), 1000, white));
+    list.push_back(new Sphere(Vec3(5, 1, 1), 1.0, red));
 
-//    list.push_back(new Translate(new RotateY(
-//            new Box(Vec3(0, 0, 0), Vec3(165, 165, 165), white), -18), Vec3(130, 0, 65)));
-//    list.push_back(new Translate(new RotateY(
-//            new Box(Vec3(0, 0, 0), Vec3(165, 330, 168), white), 15), Vec3(265, 0, 295)));
     world = new BVHNode(list.begin(), list.end(), list.size());
 }
 
