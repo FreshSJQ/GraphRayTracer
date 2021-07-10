@@ -27,6 +27,9 @@ struct ScatterRecord {
     bool isSpecular;
     Vec3 attenuation;
     PDF *pdf_ptr;
+
+    Vec3 diffuseColor;
+    Vec3 specularColor;
 };
 
 class Material {
@@ -69,9 +72,15 @@ public:
 class Microfacet : public Material {
     Texture *albedo;
     double roughness;
-
+    Texture *specular;
 public:
-    Microfacet(Texture *a, double r):albedo(a), roughness(r){}
+    Microfacet(Texture *a, double r, Texture *s):albedo(a), roughness(r), specular(s){}
+
+    double scateringPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const override {
+        double cosine = dot(rec.normal, unit_vector(scattered.getDirection()));
+        if (cosine < 0) cosine = 0;
+        return cosine / PI;
+    }
 
     bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const override;
 };
@@ -98,6 +107,23 @@ public:
         if(dot(rec.normal, r_in.getDirection()) > 0.0)
             return emit->Value(u, v, p);
         else return Vec3(0, 0, 0);
+    }
+};
+
+class AnisotropicPhong : public Material {
+    Texture* albedo;
+    Texture* specular;
+    double nu, nv;
+public:
+    AnisotropicPhong(double u, double v, Texture* diffuse, Texture* specularColor):
+        albedo(diffuse), specular(specularColor), nu(u), nv(v) {}
+
+    bool scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const override;
+
+    double scateringPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const override {
+        double cosine = dot(rec.normal, unit_vector(scattered.getDirection()));
+        if (cosine < 0) cosine = 0;
+        return cosine / PI;
     }
 };
 

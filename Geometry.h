@@ -18,6 +18,8 @@ public:
         box = AxisAlignedBoundingBox(center - Vec3(radius, radius, radius), center + Vec3(radius, radius, radius));
         return true;
     }
+
+
 };
 
 class Disk: public Hitable {

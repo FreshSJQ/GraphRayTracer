@@ -18,12 +18,16 @@ bool Metal::scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec)
 }
 
 bool Microfacet::scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const {
-//    double alpha = pow(roughness, 2.);
-//    double F, D, G;
-//
-//    double alphaSqr = alpha * alpha;
-//    double NdotH = dot(hrec.normal, )
-//    double denom =
+    srec.isSpecular = true;
+    srec.attenuation = albedo->Value(hrec.u, hrec.v, hrec.p);
+    srec.pdf_ptr = new MicrofacetPDF(r_in.getDirection(), hrec.normal, roughness);
+    srec.specularColor = specular->Value(hrec.u, hrec.v, hrec.p);
+
+    Vec3 dir = srec.pdf_ptr->generate(&srec);
+//    while(dot(dir, hrec.normal) < 0) {
+//        dir = srec.pdf_ptr->generate(&srec);
+//    }
+    srec.specularRay = Ray(hrec.p, dir);
     return true;
 }
 
@@ -57,6 +61,23 @@ bool Dielectric::scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &
     }
     else {
         srec.specularRay = Ray(hrec.p, refracted);
+    }
+    return true;
+}
+
+bool AnisotropicPhong::scatter(const Ray &r_in, const HitRecord &hrec, ScatterRecord &srec) const {
+    srec.isSpecular = false;
+    srec.attenuation = srec.diffuseColor = albedo->Value(hrec.u, hrec.v, hrec.p);
+    srec.specularColor = specular->Value(hrec.u, hrec.v, hrec.p);
+
+    srec.pdf_ptr = new AnisotropicPhongPDF(r_in.getDirection(), hrec.normal, nu, nv);
+
+    if(srec.isSpecular) {
+        Vec3 dir = srec.pdf_ptr->generate(&srec);
+        while(dot(dir, hrec.normal) < 0) {
+            dir = srec.pdf_ptr->generate(&srec);
+        }
+        srec.specularRay = Ray(hrec.p + 1e-5 * hrec.normal, dir);
     }
     return true;
 }
